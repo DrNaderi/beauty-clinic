@@ -1,17 +1,18 @@
 (function () {
   if (document.querySelector("base[data-site-root]")) return;
+  if (typeof window.getSiteBasePath !== "function") return;
 
-  var base = "/";
-  if (location.hostname.endsWith("github.io")) {
-    var seg = location.pathname.replace(/^\//, "").split("/")[0];
-    if (seg && !/^(about|gallery|reserve|service)$/i.test(seg)) {
-      base = "/" + seg + "/";
-    }
-  }
-
+  var base = window.getSiteBasePath();
   window.SITE_BASE_PATH = base;
+
   var el = document.createElement("base");
   el.href = base;
   el.setAttribute("data-site-root", "");
-  document.head.appendChild(el);
+
+  var script = document.currentScript;
+  if (script && script.parentNode) {
+    script.parentNode.insertBefore(el, script.nextSibling);
+  } else {
+    document.head.insertBefore(el, document.head.firstChild);
+  }
 })();

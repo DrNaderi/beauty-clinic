@@ -15,13 +15,16 @@ function serviceHref(title) {
   return `service/?title=${encodeURIComponent(title)}`;
 }
 
-function scriptBaseUrl() {
+function siteRootUrl() {
+  if (window.SITE_BASE_PATH) {
+    return new URL(window.SITE_BASE_PATH, location.origin);
+  }
   const scripts = document.querySelectorAll('script[src*="script.js"]');
   const current = scripts[scripts.length - 1];
   if (current?.src) {
     return new URL("./", current.src);
   }
-  return new URL("./", window.location.href);
+  return new URL("./", location.origin + "/");
 }
 
 function assetUrl(path) {
@@ -31,7 +34,7 @@ function assetUrl(path) {
       index === 0 || segment === "" ? segment : encodeURIComponent(segment)
     )
     .join("/");
-  return new URL(encoded, scriptBaseUrl()).href;
+  return new URL(encoded, siteRootUrl()).href;
 }
 
 async function fetchJson(url) {
@@ -52,8 +55,8 @@ async function loadSiteData() {
 
   try {
     const [manifest, services] = await Promise.all([
-      fetchJson(new URL("data/manifest.json", scriptBaseUrl()).href),
-      fetchJson(new URL("services.json", scriptBaseUrl()).href),
+      fetchJson(new URL("data/manifest.json", siteRootUrl()).href),
+      fetchJson(new URL("services.json", siteRootUrl()).href),
     ]);
     return {
       portfolio: manifest.portfolio,
