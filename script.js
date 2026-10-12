@@ -16,15 +16,12 @@ function serviceHref(title) {
 }
 
 function siteRootUrl() {
-  if (window.SITE_BASE_PATH) {
-    return new URL(window.SITE_BASE_PATH, location.origin);
-  }
   const scripts = document.querySelectorAll('script[src*="script.js"]');
   const current = scripts[scripts.length - 1];
   if (current?.src) {
     return new URL("./", current.src);
   }
-  return new URL("./", location.origin + "/");
+  return new URL("./", window.location.href);
 }
 
 function assetUrl(path) {
