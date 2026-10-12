@@ -12,9 +12,7 @@ function captionFromPath(path) {
 }
 
 function serviceHref(title) {
-  const url = new URL("service/", scriptBaseUrl());
-  url.searchParams.set("title", title);
-  return `${url.pathname}${url.search}`;
+  return `service/?title=${encodeURIComponent(title)}`;
 }
 
 function scriptBaseUrl() {
