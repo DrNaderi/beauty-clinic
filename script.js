@@ -12,7 +12,7 @@ function captionFromPath(path) {
 }
 
 function serviceHref(title) {
-  return `service/?title=${encodeURIComponent(title)}`;
+  return `./service.html?title=${encodeURIComponent(title)}`;
 }
 
 function siteRootUrl() {
