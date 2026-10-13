@@ -11,12 +11,19 @@ function captionFromPath(path) {
   return normalizeKey(name);
 }
 
+function rootHref() {
+  const path = location.pathname;
+  const nested =
+    /\/(about|gallery|reserve|service|portfolio-category)(\/|$)/i.test(path);
+  return nested ? "../" : "./";
+}
+
 function serviceHref(title) {
-  return `./service.html?title=${encodeURIComponent(title)}`;
+  return `${rootHref()}service/?title=${encodeURIComponent(title)}`;
 }
 
 function portfolioCategoryHref(name) {
-  return `./portfolio-category.html?category=${encodeURIComponent(name)}`;
+  return `${rootHref()}portfolio-category/?category=${encodeURIComponent(name)}`;
 }
 
 function siteRootUrl() {
@@ -244,7 +251,7 @@ async function initPortfolioCategory() {
   document.title = `${category.name} | نمونه کارها`;
 
   root.innerHTML = `
-    <a href="./gallery.html" class="btn btn-back">بازگشت</a>
+    <a href="${rootHref()}gallery/" class="btn btn-back">بازگشت</a>
     <h1 class="page-title">${escapeHtml(category.name)}</h1>
     <div class="category-gallery-grid" id="category-gallery-grid"></div>
   `;
@@ -394,7 +401,7 @@ async function initServiceDetail() {
   document.title = `${service.title} | دکتر دالغا نادری`;
 
   root.innerHTML = `
-    <a href="./index.html#services" class="btn btn-back">بازگشت</a>
+    <a href="${rootHref()}#services" class="btn btn-back">بازگشت</a>
     <h1>${escapeHtml(service.title)}</h1>
     <p class="service-detail-lead">${escapeHtml(service.short_description)}</p>
     <div class="service-detail-image thumb-lightbox" role="button" tabindex="0" aria-label="نمایش تصویر در اندازه کامل">
