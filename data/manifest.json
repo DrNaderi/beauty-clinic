@@ -13,7 +13,8 @@
         "images/portfolio/درمال فیلر 7.jpg",
         "images/portfolio/درمال فیلر 8.jpg",
         "images/portfolio/درمال فیلر 9.jpg",
-        "images/portfolio/درمال فیلر 10.jpg"
+        "images/portfolio/درمال فیلر 10.jpg",
+        "images/portfolio/درمال فیلر 11.jpg"
       ]
     },
     {
@@ -85,6 +86,24 @@
       ]
     },
     {
+      "name": "فیلر چانه",
+      "cover": "images/portfolio/فیلر چانه.jpg",
+      "images": [
+        "images/portfolio/فیلر چانه.jpg",
+        "images/portfolio/فیلر چانه 2.jpg",
+        "images/portfolio/فیلر چانه 3.jpg"
+      ]
+    },
+    {
+      "name": "لیفت گونه",
+      "cover": "images/portfolio/لیفت گونه.jpg",
+      "images": [
+        "images/portfolio/لیفت گونه.jpg",
+        "images/portfolio/لیفت گونه 2.jpg",
+        "images/portfolio/لیفت گونه 3.jpg"
+      ]
+    },
+    {
       "name": "مزوژل",
       "cover": "images/portfolio/مزوژل.jpg",
       "images": [
@@ -107,35 +126,6 @@
       "images": [
         "images/portfolio/خال برداری.jpg",
         "images/portfolio/خال برداری 2.jpg"
-      ]
-    },
-    {
-      "name": "فیلر چانه",
-      "cover": "images/portfolio/فیلر چانه.jpg",
-      "images": [
-        "images/portfolio/فیلر چانه.jpg",
-        "images/portfolio/فیلر چانه 2.jpg"
-      ]
-    },
-    {
-      "name": "تزریق چانه",
-      "cover": "images/portfolio/تزریق چانه.jpg",
-      "images": [
-        "images/portfolio/تزریق چانه.jpg"
-      ]
-    },
-    {
-      "name": "دیمونو درمال فیلر",
-      "cover": "images/portfolio/دیمونو درمال فیلر.jpg",
-      "images": [
-        "images/portfolio/دیمونو درمال فیلر.jpg"
-      ]
-    },
-    {
-      "name": "لیفت گونه",
-      "cover": "images/portfolio/لیفت گونه.jpg",
-      "images": [
-        "images/portfolio/لیفت گونه.jpg"
       ]
     }
   ],
