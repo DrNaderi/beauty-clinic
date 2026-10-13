@@ -11,21 +11,6 @@ function captionFromPath(path) {
   return normalizeKey(name);
 }
 
-function rootHref() {
-  const path = location.pathname;
-  const nested =
-    /\/(about|gallery|reserve|service|portfolio-category)(\/|$)/i.test(path);
-  return nested ? "../" : "./";
-}
-
-function serviceHref(title) {
-  return `${rootHref()}service/?title=${encodeURIComponent(title)}`;
-}
-
-function portfolioCategoryHref(name) {
-  return `${rootHref()}portfolio-category/?category=${encodeURIComponent(name)}`;
-}
-
 function siteRootUrl() {
   const scripts = document.querySelectorAll('script[src*="script.js"]');
   const current = scripts[scripts.length - 1];
@@ -33,6 +18,25 @@ function siteRootUrl() {
     return new URL("./", current.src);
   }
   return new URL("./", window.location.href);
+}
+
+(function ensureFolderTrailingSlash() {
+  const path = location.pathname.replace(/\/index\.html$/i, "/");
+  if (/\/(about|gallery|reserve|service|portfolio-category)$/i.test(path)) {
+    location.replace(`${path}/${location.search}${location.hash}`);
+  }
+})();
+
+function siteHref(relativePath) {
+  return new URL(relativePath, siteRootUrl()).href;
+}
+
+function serviceHref(title) {
+  return siteHref(`service/?title=${encodeURIComponent(title)}`);
+}
+
+function portfolioCategoryHref(name) {
+  return siteHref(`portfolio-category/?category=${encodeURIComponent(name)}`);
 }
 
 function assetUrl(path) {
@@ -251,7 +255,7 @@ async function initPortfolioCategory() {
   document.title = `${category.name} | نمونه کارها`;
 
   root.innerHTML = `
-    <a href="${rootHref()}gallery/" class="btn btn-back">بازگشت</a>
+    <a href="${siteHref("gallery/")}" class="btn btn-back">بازگشت</a>
     <h1 class="page-title">${escapeHtml(category.name)}</h1>
     <div class="category-gallery-grid" id="category-gallery-grid"></div>
   `;
@@ -401,7 +405,7 @@ async function initServiceDetail() {
   document.title = `${service.title} | دکتر دالغا نادری`;
 
   root.innerHTML = `
-    <a href="${rootHref()}#services" class="btn btn-back">بازگشت</a>
+    <a href="${siteHref("./")}#services" class="btn btn-back">بازگشت</a>
     <h1>${escapeHtml(service.title)}</h1>
     <p class="service-detail-lead">${escapeHtml(service.short_description)}</p>
     <div class="service-detail-image thumb-lightbox" role="button" tabindex="0" aria-label="نمایش تصویر در اندازه کامل">
