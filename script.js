@@ -15,6 +15,10 @@ function serviceHref(title) {
   return `./service.html?title=${encodeURIComponent(title)}`;
 }
 
+function portfolioCategoryHref(name) {
+  return `./portfolio-category.html?category=${encodeURIComponent(name)}`;
+}
+
 function siteRootUrl() {
   const scripts = document.querySelectorAll('script[src*="script.js"]');
   const current = scripts[scripts.length - 1];
@@ -42,9 +46,9 @@ async function fetchJson(url) {
 
 async function loadSiteData() {
   const embedded = window.SITE_DATA;
-  if (embedded?.portfolio?.length && embedded?.services?.length) {
+  if (embedded?.portfolioCategories?.length && embedded?.services?.length) {
     return {
-      portfolio: embedded.portfolio,
+      portfolioCategories: embedded.portfolioCategories,
       servicesImages: embedded.servicesImages,
       services: embedded.services,
     };
@@ -56,7 +60,7 @@ async function loadSiteData() {
       fetchJson(new URL("services.json", siteRootUrl()).href),
     ]);
     return {
-      portfolio: manifest.portfolio,
+      portfolioCategories: manifest.portfolioCategories,
       servicesImages: manifest.services,
       services,
     };
@@ -167,45 +171,108 @@ function bindThumbLightbox(thumb, url, caption) {
   });
 }
 
+function createReadMoreLink(href, label) {
+  const a = document.createElement("a");
+  a.className = "btn btn-small btn-read-more";
+  a.href = href;
+  a.textContent = label || "ادامه مطلب";
+  return a;
+}
+
 async function initGallery() {
   const grid = document.getElementById("gallery-grid");
   if (!grid) return;
 
   const data = await loadSiteData();
-  if (!data?.portfolio?.length) {
+  if (!data?.portfolioCategories?.length) {
     showLoadError(grid, "بارگذاری تصاویر نمونه کارها ممکن نشد.");
     return;
   }
 
-  data.portfolio.forEach((path) => {
-    const url = assetUrl(path);
-    const caption = captionFromPath(path);
-    const item = document.createElement("article");
-    item.className = "card gallery-card photo";
-    item.tabIndex = 0;
-    item.setAttribute("role", "button");
+  const sorted = [...data.portfolioCategories].sort(
+    (a, b) => b.images.length - a.images.length
+  );
 
-    const thumb = createSquareThumb(url, caption);
+  sorted.forEach((category) => {
+    const url = assetUrl(category.cover);
+    const card = document.createElement("article");
+    card.className = "card gallery-card";
+
+    const thumb = createSquareThumb(url, category.name);
+    bindThumbLightbox(thumb, url, category.name);
 
     const body = document.createElement("div");
     body.className = "card-body card-body--title-only";
     const h3 = document.createElement("h3");
-    h3.textContent = caption;
+    h3.textContent = category.name;
     body.appendChild(h3);
 
-    item.appendChild(thumb);
-    item.appendChild(body);
+    const actions = document.createElement("div");
+    actions.className = "card-actions";
+    actions.appendChild(createReadMoreLink(portfolioCategoryHref(category.name)));
 
-    const open = () => window.openLightbox(url, caption);
-    item.addEventListener("click", open);
-    item.addEventListener("keydown", (e) => {
+    card.appendChild(thumb);
+    card.appendChild(body);
+    card.appendChild(actions);
+    grid.appendChild(card);
+  });
+}
+
+async function initPortfolioCategory() {
+  const root = document.getElementById("portfolio-category");
+  if (!root) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const categoryName = params.get("category");
+  if (!categoryName) {
+    root.innerHTML = '<p class="error-msg">دسته‌بندی یافت نشد.</p>';
+    return;
+  }
+
+  const data = await loadSiteData();
+  if (!data?.portfolioCategories?.length) {
+    root.innerHTML = '<p class="error-msg">بارگذاری تصاویر ممکن نشد.</p>';
+    return;
+  }
+
+  const category = data.portfolioCategories.find((c) => c.name === categoryName);
+  if (!category) {
+    root.innerHTML = '<p class="error-msg">دسته‌بندی یافت نشد.</p>';
+    return;
+  }
+
+  document.title = `${category.name} | نمونه کارها`;
+
+  root.innerHTML = `
+    <a href="./gallery.html" class="btn btn-back">بازگشت</a>
+    <h1 class="page-title">${escapeHtml(category.name)}</h1>
+    <div class="category-gallery-grid" id="category-gallery-grid"></div>
+  `;
+
+  const grid = root.querySelector("#category-gallery-grid");
+
+  category.images.forEach((path) => {
+    const url = assetUrl(path);
+    const alt = captionFromPath(path);
+    const fig = document.createElement("figure");
+    fig.className = "category-photo";
+    fig.dataset.src = url;
+    fig.dataset.alt = alt;
+    fig.tabIndex = 0;
+    fig.setAttribute("role", "button");
+
+    fig.appendChild(createSquareThumb(url, alt));
+
+    const open = () => window.openLightbox(url, alt);
+    fig.addEventListener("click", open);
+    fig.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         open();
       }
     });
 
-    grid.appendChild(item);
+    grid.appendChild(fig);
   });
 }
 
@@ -238,18 +305,22 @@ async function initServicesGrid() {
     const thumb = createSquareThumb(url, service.title);
     bindThumbLightbox(thumb, url, service.title);
 
-    const link = document.createElement("a");
-    link.className = "card-body";
-    link.href = serviceHref(service.title);
+    const body = document.createElement("div");
+    body.className = "card-body";
     const h3 = document.createElement("h3");
     h3.textContent = service.title;
     const p = document.createElement("p");
     p.textContent = service.short_description;
-    link.appendChild(h3);
-    link.appendChild(p);
+    body.appendChild(h3);
+    body.appendChild(p);
+
+    const actions = document.createElement("div");
+    actions.className = "card-actions";
+    actions.appendChild(createReadMoreLink(serviceHref(service.title)));
 
     card.appendChild(thumb);
-    card.appendChild(link);
+    card.appendChild(body);
+    card.appendChild(actions);
     grid.appendChild(card);
     count += 1;
   });
@@ -261,7 +332,19 @@ async function initServicesGrid() {
 
 function formatDescription(text) {
   const parts = text.split(/\n\n+/).filter(Boolean);
-  return parts.map((p) => `<p>${escapeHtml(p)}</p>`).join("");
+  return parts
+    .map((block) => {
+      const lines = block.split("\n").filter(Boolean);
+      const allBullets = lines.every((line) => line.trim().startsWith("•"));
+      if (allBullets && lines.length > 0) {
+        const items = lines
+          .map((line) => `<li>${escapeHtml(line.trim().replace(/^•\s*/, ""))}</li>`)
+          .join("");
+        return `<ul class="prose-list">${items}</ul>`;
+      }
+      return `<p>${escapeHtml(block.replace(/\n/g, " "))}</p>`;
+    })
+    .join("");
 }
 
 function escapeHtml(str) {
@@ -311,12 +394,14 @@ async function initServiceDetail() {
   document.title = `${service.title} | دکتر دالغا نادری`;
 
   root.innerHTML = `
+    <a href="./index.html#services" class="btn btn-back">بازگشت</a>
     <h1>${escapeHtml(service.title)}</h1>
+    <p class="service-detail-lead">${escapeHtml(service.short_description)}</p>
     <div class="service-detail-image thumb-lightbox" role="button" tabindex="0" aria-label="نمایش تصویر در اندازه کامل">
       <img src="${escapeHtml(url)}" alt="${escapeHtml(service.title)}">
       <span class="image-expand-hint">برای بزرگ‌نمایی کلیک کنید</span>
     </div>
-    <div class="service-detail-body">${formatDescription(service.description)}</div>
+    <div class="service-detail-body prose">${formatDescription(service.description)}</div>
   `;
 
   const imageWrap = root.querySelector(".service-detail-image");
@@ -345,6 +430,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ensureLightbox();
   initScrollReveal();
   initGallery();
+  initPortfolioCategory();
   initServicesGrid();
   initServiceDetail();
 });
